@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.sparkutils</groupId>
+    <artifactId>scalameter_shaded_${scalaCompatVersion}</artifactId>
+
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Scalameter Shaded</name>
+    <description>Allow Scalameter to be used with recent Spark versions</description>
+    <url>https://sparkutils.github.io/scalameter_shaded/</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://github.com/sparkutils/scalameter_shaded/blob/main/LICENSE</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Chris Twiner</name>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/scalameter_shaded/quality.git</connection>
+        <developerConnection>scm:git:ssh://github.com:scalameter_shaded/quality.git</developerConnection>
+        <url>http://github.com/scalameter_shaded/quality/tree/master</url>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>dummy</id>
+            <properties>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala_2.12</id>
+            <properties>
+                <scalaVersion>2.12.18</scalaVersion>
+                <scalaCompatVersion>2.12</scalaCompatVersion>
+                <jarjarCompatVersion>2.12</jarjarCompatVersion>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala_2.13</id>
+            <properties>
+                <scalaVersion>2.13.12</scalaVersion>
+                <scalaCompatVersion>2.13</scalaCompatVersion>
+                <jarjarCompatVersion>2.13</jarjarCompatVersion>
+            </properties>
+        </profile>
+    </profiles>
+
+    <properties>
+        <scalaMeterVersion>0.19</scalaMeterVersion>
+
+        <mavenCompilerPluginVersion>3.8.1</mavenCompilerPluginVersion>
+        <mavenJarPluginVersion>3.2.0</mavenJarPluginVersion>
+        <mavenShadePluginVersion>3.2.1</mavenShadePluginVersion>
+        <mavenFlattenPluginVersion>1.2.7</mavenFlattenPluginVersion>
+        <mavenProjectInfoReportsPluginVersion>3.1.1</mavenProjectInfoReportsPluginVersion>
+
+        <jarjarVersion>1.14.0</jarjarVersion>
+        <scriptingPluginVersion>3.0.0</scriptingPluginVersion>
+    </properties>
+    <!--
+        <repositories>
+            <repository>
+                <id>mvn_snapshots</id>
+                <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            </repository>
+        </repositories>
+    -->
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Quality Release Repository</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Quality Snapshot Repository</name>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.storm-enroute</groupId>
+            <artifactId>scalameter_${scalaCompatVersion}</artifactId>
+            <version>${scalaMeterVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mongodb</groupId>
+                    <artifactId>casbah_${scalaCompatVersion}</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${mavenCompilerPluginVersion}</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${mavenJarPluginVersion}</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
+                        </manifestEntries>
+                        <manifestSections>
+                            <manifestSection>
+                                <name>Versions</name>
+                                <manifestEntries>
+                                    <Project-Version>${project.version}</Project-Version>
+                                    <Project-Git-Hash>${GITHUB_SHA}</Project-Git-Hash>
+                                    <Project-CI-Branch>${GITHUB_BASE_REF}</Project-CI-Branch>
+                                    <Project-CI-Run-ID>${GITHUB_RUN_ID}</Project-CI-Run-ID>
+                                    <Project-URL>${GITHUB_REPOSITORY}</Project-URL>
+                                </manifestEntries>
+                            </manifestSection>
+                        </manifestSections>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${mavenFlattenPluginVersion}</version>
+                <configuration>
+                    <flattenMode>oss</flattenMode>
+                </configuration>
+                <executions>
+                    <!-- enable flattening -->
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <!-- ensure proper cleanup -->
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${mavenShadePluginVersion}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- does not work <minimizeJar>true</minimizeJar> -->
+                            <artifactSet>
+                                <includes>
+                                    <include>com.sparkutils:*</include>
+                                    <!-- --> <include>junit:*</include>
+                                    <include>org.scalatest:*</include>
+                                    <include>com.storm-enroute:*</include>
+                                    <include>org.hamcrest:*</include>
+                                    <include>com.chuusai:*</include>
+                                    <include>org.typelevel:*</include>
+                                    <include>net.openhft:*</include>
+                                    <include>org.scalactic:*</include>
+                                    <include>org.scalatestplus:*</include>
+                                    <include>org.scalacheck:*</include>
+                                    <include>com.globalmentor:*</include>
+                                    <include>org.yaml:*</include>
+                                    <include>com.fasterxml.jackson.module:*</include>
+                                    <include>com.fasterxml.jackson.core:*</include>
+                                </includes>
+                                <excludes>
+                                    <exclude>org.scala-lang:*</exclude>
+                                    <exclude>log4j:log4j:jar:</exclude>
+                                    <exlcude>org.apache.commons:*</exlcude>
+                                </excludes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scripting-plugin</artifactId>
+                <version>${scriptingPluginVersion}</version>
+                <executions>
+                    <execution>
+                        <id>jarjarCaller</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>eval</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <engineName>groovy</engineName>
+                    <script>
+                        def ogFile = project.getArtifact().getFile()
+                        def targetDir = ogFile.getParentFile()
+                        def shaded = new java.io.File(targetDir, "shaded-" + ogFile.getName())
+                        org.codehaus.plexus.util.FileUtils.rename(ogFile, shaded)
+                        new com.eed3si9n.jarjarabrams.Main().process((new java.io.File("./shade.rules")).toPath(), shaded.toPath(), ogFile.toPath())
+                    </script>
+                </configuration>
+                <dependencies>
+                    <!-- ScriptEngines -->
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-jsr223</artifactId>
+                        <version>3.0.7</version> <!-- look for latest -->
+                    </dependency>
+                    <dependency>
+                        <groupId>com.eed3si9n.jarjarabrams</groupId>
+                        <artifactId>jarjar-abrams-core_${jarjarCompatVersion}</artifactId>
+                        <version>${jarjarVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Prevent gpg from using pinentry programs -->
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.13</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <stagingProgressTimeoutMinutes>45</stagingProgressTimeoutMinutes>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+</project>
