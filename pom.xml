@@ -5,7 +5,7 @@
     <groupId>com.sparkutils</groupId>
     <artifactId>scalameter_shaded_${scalaCompatVersion}</artifactId>
 
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>Scalameter Shaded</name>
     <description>Allow Scalameter to be used with recent Spark versions</description>
     <url>https://sparkutils.github.io/scalameter_shaded/</url>
