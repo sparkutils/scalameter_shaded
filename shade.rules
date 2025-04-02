@@ -1,6 +1,5 @@
-rule org.scalatest.** sparkutils.org.scalatest.@1
-rule org.scalatestplus.** sparkutils.org.scalatestplus.@1
-rule org.scalactic.** sparkutils.org.scalactic.@1
-rule org.scalacheck.** sparkutils.org.scalacheck.@1
-rule com.fasterxml.jackson.** sparkutils.com.fasterxml.jackson.@1
-
+rule org.scalatest.** sparkutilsScalameter.org.scalatest.@1
+rule org.scalatestplus.** sparkutilsScalameter.org.scalatestplus.@1
+rule org.scalactic.** sparkutilsScalameter.org.scalactic.@1
+rule org.scalacheck.** sparkutilsScalameter.org.scalacheck.@1
+rule com.fasterxml.jackson.** sparkutilsScalameter.com.fasterxml.jackson.@1
